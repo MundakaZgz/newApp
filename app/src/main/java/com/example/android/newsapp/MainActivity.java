@@ -12,18 +12,21 @@ import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<List<News>> {
 
-    private static final String NEWS_API = "https://www.googleapis.com/books/v1/volumes?q=%s&maxResults=10";
+    private static final String NEWS_API = "http://content.guardianapis.com/search?q=debates";
+    private static final String API_KEY = "test";
     public static final int NEWS_LOADER_ID = 1;
     private NewsAdapter mAdapter;
     private TextView mEmptyStateTextView;
@@ -57,39 +60,34 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                 News news = mAdapter.getItem(position);
 
                 // Convert the String URL into a URI object
-                Uri newsUri = Uri.parse(news.getWebReaderLink());
-
+                Uri newsUri = Uri.parse(news.getWebUrl());
                 // Create a new intent to view the news details
                 Intent websiteIntent = new Intent(Intent.ACTION_VIEW, newsUri);
 
                 // Create the intent to launch the new activity
                 startActivity(websiteIntent);
+
             }
         });
 
-        hideLoadingIndicator();
+        getData(newsListView);
 
     }
 
-    public void search(View view) {
-        EditText search = (EditText) findViewById(R.id.search_key);
-        query = search.getText().toString();
-        if(!TextUtils.isEmpty(query)) {
-            showLoadingIndicator();
-            // Get a reference to ConnectivityManager
-            ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+    public void getData(View view) {
 
-            // Get details on the current active default data network
-            NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+        showLoadingIndicator();
+        // Get a reference to ConnectivityManager
+        ConnectivityManager connectivityManager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
 
-            if(networkInfo != null && networkInfo.isConnected()) {
-                getLoaderManager().initLoader(NEWS_LOADER_ID, null, this);
-            } else {
-                hideLoadingIndicator();
-                mEmptyStateTextView.setText(R.string.no_internet_connection);
-            }
+        // Get details on the current active default data network
+        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
+
+        if(networkInfo != null && networkInfo.isConnected()) {
+            getLoaderManager().initLoader(NEWS_LOADER_ID, null, this);
         } else {
-            mAdapter.clear();
+            hideLoadingIndicator();
+            mEmptyStateTextView.setText(R.string.no_internet_connection);
         }
 
     }
@@ -135,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @Override
     public Loader<List<News>> onCreateLoader(int id, Bundle args) {
-        return new NewsLoader(this, String.format(NEWS_API, query));
+        return new NewsLoader(this, QueryUtils.getConnectionUrl(NEWS_API, API_KEY));
     }
 
     @Override

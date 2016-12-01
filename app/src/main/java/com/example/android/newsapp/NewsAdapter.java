@@ -47,30 +47,21 @@ public class NewsAdapter extends ArrayAdapter<News> {
 
         News news = this.news.get(position);
 
-//        TextView titleView = (TextView) currentView.findViewById(R.id.title);
-//        TextView subtitleView = (TextView) currentView.findViewById(R.id.subtitle);
-//        TextView authorsView = (TextView) currentView.findViewById(R.id.authors);
-//
-//        titleView.setText(news.getTitle());
-//        subtitleView.setText(news.getSubtitle());
-//        authorsView.setText(formatAuthors(news.getAuthors()));
+        TextView titleView = (TextView) currentView.findViewById(R.id.title);
+        TextView sectionView = (TextView) currentView.findViewById(R.id.section);
+        TextView dateView = (TextView) currentView.findViewById(R.id.date);
+
+        titleView.setText(news.getWebtitle());
+        sectionView.setText(news.getSectionName());
+        dateView.setText(formatDate(news.getWebPublicationDate()));
 
         return currentView;
     }
 
-//    private String formatAuthors(String[] authors) {
-//
-//        StringBuilder sb = new StringBuilder();
-//
-//        for (int i = 0; i < authors.length; i++) {
-//            sb.append(authors[i]);
-//            if(i < authors.length-1) {
-//                sb.append(", ");
-//            }
-//        }
-//
-//        return sb.toString();
-//    }
+    private String formatDate(String date) {
+        String result = date.substring(0,date.indexOf("T"));
+        return result;
+    }
 
     @Nullable
     @Override
